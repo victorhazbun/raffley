@@ -6,8 +6,14 @@ defmodule RaffleyWeb.RulesController do
   def index(conn, _params) do
     emojis = ~w(🏆 🙌 🎉) |> Enum.random() |> String.duplicate(5)
 
-    rules = Rule.list()
+    rules = Rule.all()
 
     render(conn, :index, emojis: emojis, rules: rules, layout: false)
+  end
+
+  def show(conn, %{"id" => id}) do
+    rule = Rule.find(id)
+
+    render(conn, :show, rule: rule)
   end
 end

@@ -1,5 +1,5 @@
 defmodule Raffley.Rule do
-  def list do
+  def all do
     [
       %{
         id: 1,
@@ -14,5 +14,17 @@ defmodule Raffley.Rule do
         text: "Have fun! 🎟️"
       }
     ]
+  end
+
+  # def find(id) do
+  #   Enum.find(all(), fn rule -> rule.id == String.to_integer(id) end)
+  # end
+
+  def find(id) when is_integer(id) do
+    Enum.find(all(), fn r -> r.id == id end)
+  end
+
+  def find(id) when is_binary(id) do
+    id |> String.to_integer() |> find()
   end
 end

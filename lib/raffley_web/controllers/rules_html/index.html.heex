@@ -5,7 +5,12 @@
   </p>
   <ol>
     <%= for rule <- @rules do %>
-      <li>{rule.text}</li>
+      <li>
+        <%!-- ~p is used to check the path exists in the router --%>
+        <a href={~p"/rules/#{rule.id}"}>
+          {rule.text}
+        </a>
+      </li>
     <% end %>
   </ol>
 </div>
