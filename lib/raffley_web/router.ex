@@ -2,7 +2,7 @@ defmodule RaffleyWeb.Router do
   use RaffleyWeb, :router
 
   def spy(conn, _opts) do
-    greeting = ~w(Hello, World!) |> Enum.random()
+    greeting = ~w(Hi Howdy Hello) |> Enum.random()
     conn = assign(conn, :greeting, greeting)
     # IO.inspect(conn, label: "Request")
     conn
