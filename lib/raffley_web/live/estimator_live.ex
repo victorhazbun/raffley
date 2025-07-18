@@ -2,22 +2,26 @@ defmodule RaffleyWeb.EstimatorLive do
   use RaffleyWeb, :live_view
 
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Process.send_after(self(), :tick, 2000)
+    end
+
     socket = assign(socket, tickets: 0, price: 3)
 
-    IO.inspect(socket)
+    IO.inspect(self(), label: "MOUNT")
 
     {:ok, socket}
   end
 
   def render(assigns) do
-    quantity = 5
+    IO.inspect(self(), label: "RENDER")
 
     ~H"""
     <div class="estimator">
       <h1>Raffle Estimator</h1>
 
       <section>
-        <button phx-click="add" phx-value-quantity={quantity}>
+        <button phx-click="add" phx-value-quantity="5">
           +
         </button>
         <div>
@@ -42,9 +46,9 @@ defmodule RaffleyWeb.EstimatorLive do
   end
 
   def handle_event("add", %{"quantity" => quantity}, socket) do
-    socket = update(socket, :tickets, &(&1 + String.to_integer(quantity)))
+    IO.inspect(self(), label: "ADD")
 
-    IO.inspect(socket)
+    socket = update(socket, :tickets, &(&1 + String.to_integer(quantity)))
 
     {:noreply, socket}
   end
@@ -52,5 +56,10 @@ defmodule RaffleyWeb.EstimatorLive do
   def handle_event("set-price", %{"price" => price}, socket) do
     socket = assign(socket, :price, String.to_integer(price))
     {:noreply, socket}
+  end
+
+  def handle_info(:tick, socket) do
+    Process.send_after(self(), :tick, 2000)
+    {:noreply, update(socket, :tickets, &(&1 + 10))}
   end
 end
