@@ -3,7 +3,7 @@ defmodule Raffley.Raffle do
 end
 
 defmodule Raffley.Raffles do
-  def list do
+  def all do
     [
       %Raffley.Raffle{
         id: 1,
