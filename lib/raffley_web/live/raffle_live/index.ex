@@ -2,6 +2,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
   use RaffleyWeb, :live_view
 
   alias Raffley.Raffles
+  import RaffleyWeb.CustomComponents
 
   def mount(_params, _session, socket) do
     socket = assign(socket, :raffles, Raffles.all())
@@ -31,16 +32,6 @@ defmodule RaffleyWeb.RaffleLive.Index do
         </div>
         <.badge status={@raffle.status} />
       </div>
-    </div>
-    """
-  end
-
-  attr :status, :atom, values: [:upcoming, :open, :closed], default: :upcoming
-
-  def badge(assigns) do
-    ~H"""
-    <div class="rounded-md px-2 py-1 text-xs font-medium uppercase inline-block border text-lime-600 border-lime-600">
-      {@status}
     </div>
     """
   end
