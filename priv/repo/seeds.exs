@@ -145,16 +145,3 @@ import Ecto.Query
   image_path: "/images/balloon-ride.jpg"
 }
 |> Repo.insert!()
-
-# Update the last inserted raffle's prize
-last_raffle = Repo.all(Raffle) |> List.last()
-Repo.update!(Ecto.Changeset.change(last_raffle, prize: "Walk with a famous person"))
-
-raffles_by_price = Repo.all(Raffle) |> Enum.group_by(& &1.ticket_price)
-IO.inspect(raffles_by_price, label: "Raffles grouped by ticket price")
-
-average_price = Repo.aggregate(Raffle, :avg, :ticket_price)
-IO.inspect(average_price, label: "Average raffle ticket price")
-
-query = from(r in Raffle, group_by: :ticket_price, select: {r.ticket_price, count(r.id)})
-Repo.all(query)
