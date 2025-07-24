@@ -1,13 +1,6 @@
 defmodule RaffleyWeb.Router do
   use RaffleyWeb, :router
 
-  def spy(conn, _opts) do
-    greeting = ~w(Hi Howdy Hello) |> Enum.random()
-    conn = assign(conn, :greeting, greeting)
-    # IO.inspect(conn, label: "Request")
-    conn
-  end
-
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -22,24 +15,37 @@ defmodule RaffleyWeb.Router do
     plug :accepts, ["json"]
   end
 
+  def spy(conn, _opts) do
+    greeting = ~w(Hi Howdy Hello) |> Enum.random()
+
+    conn = assign(conn, :greeting, greeting)
+
+    # IO.inspect(conn)
+
+    conn
+  end
+
   scope "/", RaffleyWeb do
     pipe_through :browser
 
-    get "/rules", RulesController, :index
-    get "/rules/:id", RulesController, :show
+    # get "/", PageController, :home
+    get "/rules", RuleController, :index
+    get "/rules/:id", RuleController, :show
+
     live "/", RaffleLive.Index
     live "/estimator", EstimatorLive
     live "/raffles", RaffleLive.Index
     live "/raffles/:id", RaffleLive.Show
 
     live "/admin/raffles", AdminRaffleLive.Index
-    live "/admin/raffles/new", AdminRaffleLive.Form
+    live "/admin/raffles/new", AdminRaffleLive.Form, :new
+    live "/admin/raffles/:id/edit", AdminRaffleLive.Form, :edit
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", RaffleyWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", RaffleyWeb do
+    pipe_through :api
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:raffley, :dev_routes) do
