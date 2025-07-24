@@ -12,7 +12,6 @@
 
 alias Raffley.Repo
 alias Raffley.Raffles.Raffle
-import Ecto.Query
 
 %Raffle{
   prize: "Autographed Jersey",

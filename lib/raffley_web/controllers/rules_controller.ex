@@ -1,18 +1,18 @@
-defmodule RaffleyWeb.RulesController do
+defmodule RaffleyWeb.RuleController do
   use RaffleyWeb, :controller
 
-  alias Raffley.Rule
+  alias Raffley.Rules
 
   def index(conn, _params) do
     emojis = ~w(🏆 🙌 🎉) |> Enum.random() |> String.duplicate(5)
 
-    rules = Rule.all()
+    rules = Rules.list_rules()
 
-    render(conn, :index, emojis: emojis, rules: rules, layout: false)
+    render(conn, :index, emojis: emojis, rules: rules)
   end
 
   def show(conn, %{"id" => id}) do
-    rule = Rule.find(id)
+    rule = Rules.get_rule(id)
 
     render(conn, :show, rule: rule)
   end
