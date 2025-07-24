@@ -5,15 +5,11 @@ defmodule RaffleyWeb.RaffleLive.Index do
   import RaffleyWeb.CustomComponents
 
   def mount(_params, _session, socket) do
-    socket = stream(socket, :raffles, Raffles.filter_raffles())
-    # IO.inspect(socket.assigns.streams.raffles, label: "MOUNT")
+    socket =
+      socket
+      |> stream(:raffles, Raffles.list_raffles())
+      |> assign(:form, to_form(%{}))
 
-    # socket =
-    #   attach_hook(socket, :log_stream, :after_render, fn
-    #     socket ->
-    #       IO.inspect(socket.assigns.streams.raffles, label: "AFTER RENDER")
-    #       socket
-    #   end)
     {:ok, socket}
   end
 
@@ -29,10 +25,35 @@ defmodule RaffleyWeb.RaffleLive.Index do
           Any guesses?
         </:details>
       </.banner>
+
+      <.filter_form form={@form} />
+
       <div class="raffles" id="raffles" phx-update="stream">
         <.raffle_card :for={{dom_id, raffle} <- @streams.raffles} raffle={raffle} id={dom_id} />
       </div>
     </div>
+    """
+  end
+
+  def filter_form(assigns) do
+    ~H"""
+    <.form for={@form} id="filter-form" phx-change="filter">
+      <.input field={@form[:q]} placeholder="Search..." autocomplete="off" />
+
+      <.input
+        type="select"
+        field={@form[:status]}
+        prompt="Status"
+        options={[:upcoming, :open, :closed]}
+      />
+
+      <.input
+        type="select"
+        field={@form[:sort_by]}
+        prompt="Sort By"
+        options={[:prize, :ticket_price]}
+      />
+    </.form>
     """
   end
 
@@ -54,5 +75,14 @@ defmodule RaffleyWeb.RaffleLive.Index do
       </div>
     </.link>
     """
+  end
+
+  def handle_event("filter", params, socket) do
+    socket =
+      socket
+      |> assign(:form, to_form(params))
+      |> stream(:raffles, Raffles.filter_raffles(params), reset: true)
+
+    {:noreply, socket}
   end
 end
