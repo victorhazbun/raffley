@@ -8,8 +8,8 @@
     "DOCKER_HOST": "unix:///var/run/docker.sock",
     "ERL_AFLAGS": "-kernel shell_history enabled"
   },
-  // Ports for: Phoenix (4000), Tests (4001), Postgres (5432), Observer VNC (6080)
-  "forwardPorts": [4000, 4001, 5432, 6080],
+  // Ports for: Phoenix (4000), Tests (4001), Postgres (5433), Observer VNC (6080)
+  "forwardPorts": [4000, 4001, 5433, 6080],
   // Features configuration for :observer
   "features": {
     "ghcr.io/devcontainers/features/desktop-lite": {},
@@ -26,7 +26,7 @@
       "onAutoForward": "silent",
       "protocol": "http"
     },
-    "5432": {
+    "5433": {
       "label": "PostgreSQL",
       "onAutoForward": "silent"
     },
