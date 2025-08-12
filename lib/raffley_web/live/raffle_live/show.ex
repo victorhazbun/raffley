@@ -4,6 +4,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
   alias Raffley.Raffles
   alias Raffley.Tickets
   alias Raffley.Tickets.Ticket
+  alias RaffleyWeb.Presence
 
   import RaffleyWeb.CustomComponents
 
@@ -18,9 +19,24 @@ defmodule RaffleyWeb.RaffleLive.Show do
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do
+    %{current_user: current_user} = socket.assigns
+
     if connected?(socket) do
       Raffles.subscribe(id)
+
+      if current_user do
+        {:ok, _} =
+          Presence.track(self(), topic(id), current_user.username, %{
+            online_at: System.system_time(:second)
+          })
+      end
     end
+
+    presences =
+      Presence.list(topic(id))
+      |> Enum.map(fn {username, %{metas: metas}} ->
+        %{id: username, metas: metas}
+      end)
 
     raffle = Raffles.get_raffle!(id)
 
@@ -30,6 +46,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
       socket
       |> assign(:raffle, raffle)
       |> stream(:tickets, tickets)
+      |> stream(:presences, presences)
       |> assign(:ticket_count, Enum.count(tickets))
       |> assign(:ticket_sum, Enum.sum_by(tickets, fn t -> t.price end))
       |> assign(:page_title, raffle.prize)
@@ -40,16 +57,19 @@ defmodule RaffleyWeb.RaffleLive.Show do
     {:noreply, socket}
   end
 
+  defp topic(id) do
+    "raffle_watchers:#{id}"
+  end
+
   def render(assigns) do
     ~H"""
-    <.banner :if={@raffle.winning_ticket}>
-      <.icon name="hero-sparkles-solid" /> Ticket #{@raffle.winning_ticket.id} Wins!
-      <:details>
-        {@raffle.winning_ticket.comment}
-      </:details>
-    </.banner>
-
     <div class="raffle-show">
+      <.banner :if={@raffle.winning_ticket}>
+        <.icon name="hero-sparkles-solid" /> Ticket #{@raffle.winning_ticket.id} Wins!
+        <:details>
+          {@raffle.winning_ticket.comment}
+        </:details>
+      </.banner>
       <div class="raffle">
         <img src={@raffle.image_path} />
         <section>
@@ -93,9 +113,24 @@ defmodule RaffleyWeb.RaffleLive.Show do
         </div>
         <div class="right">
           <.featured_raffles raffles={@featured_raffles} />
+          <.raffle_watchers :if={@current_user} presences={@streams.presences} />
         </div>
       </div>
     </div>
+    """
+  end
+
+  def raffle_watchers(assigns) do
+    ~H"""
+    <section>
+      <h4>Who's Here?</h4>
+      <ul class="presences" id="raffle-watchers" phx-update="stream">
+        <li :for={{dom_id, %{id: username, metas: metas}} <- @presences} id={dom_id}>
+          <.icon name="hero-user-circle-solid" class="w-5 h-5" />
+          {username} ({length(metas)})
+        </li>
+      </ul>
+    </section>
     """
   end
 
